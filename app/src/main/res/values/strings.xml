@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">fridge_launcher</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="apps">我的应用</string>
+    <string name="statistic">内存分析</string>
+    <string name="setting">我的设置</string>
 </resources>
