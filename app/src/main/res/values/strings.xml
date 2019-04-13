@@ -4,4 +4,12 @@
     <string name="apps">我的应用</string>
     <string name="statistic">内存分析</string>
     <string name="setting">我的设置</string>
+    <string name="memory">内存</string>
+    <string name="cpu">CPU</string>
+    <string name="net">网络</string>
+
+    <string name="no_chart_line_data">无后台数据</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
