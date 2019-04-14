@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,8 +14,10 @@ import android.view.ViewGroup;
 
 import com.bysj.lizhunan.R;
 import com.bysj.lizhunan.base.BaseFragment;
+import com.bysj.lizhunan.base.What;
 import com.bysj.lizhunan.bean.App;
 import com.bysj.lizhunan.core.MemoryMonitor;
+import com.bysj.lizhunan.unit.LineChartManager;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
@@ -33,8 +36,9 @@ public class StatisticsFragment extends BaseFragment {
     private static StatisticsFragment INSTANCE;
 
     private LineChart memoryLc, cpuLc, netLc;
-    private LineDataSet lineDataSet;
-    private LineData data;
+    private LineChartManager memoryChartManager;
+    private LineChartManager cpuChartManager;
+    private LineChartManager netChartManager;
 
     public StatisticsFragment() {
 
@@ -58,32 +62,26 @@ public class StatisticsFragment extends BaseFragment {
         cpuLc = $(view, R.id.cpu_Chart);
         netLc = $(view, R.id.net_Chart);
 
-        List<Entry> entries = new ArrayList<>();
-        setLineChart(getResources().getString(R.string.memory), memoryLc, entries);
-        setLineChart(getResources().getString(R.string.cpu), cpuLc, entries);
-        setLineChart(getResources().getString(R.string.net), netLc, entries);
-
+        //初始化折线图
+        memoryChartManager = new LineChartManager(memoryLc,getResources().getString(R.string.memory),getResources().getColor(R.color.colorTealPrimaryDark));
+        cpuChartManager = new LineChartManager(cpuLc,getResources().getString(R.string.cpu),getResources().getColor(R.color.colorTealPrimaryDark));
+        netChartManager = new LineChartManager(netLc,getResources().getString(R.string.net),getResources().getColor(R.color.colorTealPrimaryDark));
+        memoryChartManager.setYAxis(100, 0, 10);
+        cpuChartManager.setYAxis(100, 0, 10);
+        netChartManager.setYAxis(100, 0, 10);
     }
 
     @Override
     protected void doBusiness(Context mContext, Activity activity) {
+
         new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
 
-                    float i = MemoryMonitor.getMemoryPercent();
+                    int i = MemoryMonitor.getMemoryPercent();
                     Log.d("tat", "d::" + i);
-                    memoryLc.setData(data);
-                    Entry entry = new Entry(lineDataSet.getEntryCount(),  (float) (Math.random()) * 80);
-                    data.addEntry(entry, 0);
-                    //通知数据已经改变
-                    data.notifyDataChanged();
-                    memoryLc.notifyDataSetChanged();
-                    //设置在曲线图中显示的最大数量
-                    memoryLc.setVisibleXRangeMaximum(10);
-                    //移到某个位置
-                    memoryLc.moveViewToX(data.getEntryCount() - 5);
+                    baseHandler.obtainMessage(What.LINE_CHART_CHANGE,i);
                     try {
                         Thread.sleep(3 * 1000);
                     } catch (InterruptedException e) {
@@ -104,36 +102,13 @@ public class StatisticsFragment extends BaseFragment {
 
     }
 
-    private void setLineChart(String title, LineChart lineChart, List<Entry> entries) {
-        lineChart.setNoDataText(getResources().getString(R.string.no_chart_line_data));
-        lineDataSet = new LineDataSet(entries, title);
-        data = new LineData(lineDataSet);
-        lineChart.setData(data);
-        XAxis xAxis = lineChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        YAxis leftYAxis = lineChart.getAxisLeft();
-        YAxis rightYAxis = lineChart.getAxisRight();
-        leftYAxis.setAxisMinimum(0f);
-        leftYAxis.setAxisMaximum(100f);
-        rightYAxis.setEnabled(false);
-        rightYAxis.setGranularity(1f);
-        rightYAxis.setLabelCount(11, false);
-        rightYAxis.setTextColor(Color.BLACK); //文字颜色
-        rightYAxis.setGridColor(Color.WHITE); //网格线颜色
-        rightYAxis.setAxisLineColor(getResources().getColor(R.color.colorTealPrimaryDark)); //Y轴颜色
-        Legend legend = lineChart.getLegend();
-        legend.setTextColor(getResources().getColor(R.color.colorTealPrimaryDark)); //设置Legend 文本颜色
-        Description description = new Description();
-        description.setText("");
-        lineChart.setDescription(description);
-        //设置曲线值的圆点是实心还是空心
-        lineDataSet.setDrawCircleHole(false);
-        lineDataSet.setCircleColor(getResources().getColor(R.color.colorTealPrimaryDark));
-        //设置显示值的字体大小
-        lineDataSet.setValueTextSize(9f);
-        //线模式为圆滑曲线（默认折线）
-        lineDataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        lineDataSet.setColor(getResources().getColor(R.color.colorTealPrimaryDark));
-    }
+    @Override
+    public void handleMessage(Message message) {
 
+        switch (message.what){
+            case What.LINE_CHART_CHANGE:
+                memoryChartManager.addEntry((Integer) message.obj);
+                break;
+        }
+    }
 }

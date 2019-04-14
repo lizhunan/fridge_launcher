@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -16,7 +17,7 @@ import android.view.WindowManager;
 
 import java.util.logging.Logger;
 
-public abstract class BaseActivity extends AppCompatActivity implements View.OnClickListener {
+public abstract class BaseActivity extends AppCompatActivity implements View.OnClickListener,BaseHandler.HandlerListener {
 
     /**
      * 是否沉浸状态栏
@@ -38,6 +39,12 @@ public abstract class BaseActivity extends AppCompatActivity implements View.OnC
      * 填充当前fragment
      */
     protected Fragment currentFragment = new Fragment();
+
+    /**
+     * handler
+     */
+    protected BaseHandler baseHandler;
+
     /**
      * 日志信息
      **/
@@ -85,6 +92,8 @@ public abstract class BaseActivity extends AppCompatActivity implements View.OnC
             } else {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }
+            baseHandler = new BaseHandler(this);
+            baseHandler.setHandlerListener(this);
             initView(mContextView);
             setListener();
             doBusiness(this);

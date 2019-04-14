@@ -10,10 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public abstract class BaseFragment extends Fragment implements View.OnClickListener {
+public abstract class BaseFragment extends Fragment implements View.OnClickListener , BaseHandler.HandlerListener {
 
     protected final String TAG = this.getClass().getSimpleName();
     private View mContextView = null;
+    protected BaseHandler baseHandler;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -25,6 +26,8 @@ public abstract class BaseFragment extends Fragment implements View.OnClickListe
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mContextView = inflater.inflate(bindLayout(), container, false);
         initView(mContextView);
+        baseHandler = new BaseHandler(this);
+        baseHandler.setHandlerListener(this);
         setListener();
         doBusiness(getContext(), getActivity());
         return mContextView;
@@ -36,6 +39,7 @@ public abstract class BaseFragment extends Fragment implements View.OnClickListe
             widgetClick(view);
         }
     }
+
 
     /**
      * 绑定布局

@@ -80,7 +80,7 @@ public class MemoryMonitor {
      *
      * @return
      */
-    public static float getMemoryPercent() {
+    public static int getMemoryPercent() {
         String dir = "/proc/meminfo"; // linux下系统目录
         try {
             FileReader fr = new FileReader(dir);
@@ -92,9 +92,8 @@ public class MemoryMonitor {
             long totalMemorySize = Integer.parseInt(subMemoryLine.replaceAll(
                     "\\D+", ""));
             long availableSize = getAvailableMemory() / 1024;
-            float percent = (int) ((totalMemorySize - availableSize)
+            return (int) ((totalMemorySize - availableSize)
                     / (float) totalMemorySize * 100);
-            return percent;
         } catch (IOException e) {
             e.printStackTrace();
         }

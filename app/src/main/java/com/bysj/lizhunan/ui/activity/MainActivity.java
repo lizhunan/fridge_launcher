@@ -2,6 +2,7 @@ package com.bysj.lizhunan.ui.activity;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.annotation.NonNull;
 
 import com.bysj.lizhunan.R;
@@ -39,6 +40,11 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     @Override
     protected void widgetClick(View view) {
+
+    }
+
+    @Override
+    public void handleMessage(Message message) {
 
     }
 
