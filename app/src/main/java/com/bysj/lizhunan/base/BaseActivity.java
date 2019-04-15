@@ -1,23 +1,25 @@
 package com.bysj.lizhunan.base;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import java.lang.ref.WeakReference;
 import java.util.logging.Logger;
 
-public abstract class BaseActivity extends AppCompatActivity implements View.OnClickListener,BaseHandler.HandlerListener {
+public abstract class BaseActivity extends AppCompatActivity implements View.OnClickListener {
 
     /**
      * 是否沉浸状态栏
@@ -43,7 +45,7 @@ public abstract class BaseActivity extends AppCompatActivity implements View.OnC
     /**
      * handler
      */
-    protected BaseHandler baseHandler;
+    protected Handler handler = new Handler(this);
 
     /**
      * 日志信息
@@ -92,8 +94,7 @@ public abstract class BaseActivity extends AppCompatActivity implements View.OnC
             } else {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }
-            baseHandler = new BaseHandler(this);
-            baseHandler.setHandlerListener(this);
+
             initView(mContextView);
             setListener();
             doBusiness(this);
@@ -174,6 +175,8 @@ public abstract class BaseActivity extends AppCompatActivity implements View.OnC
      * 设置监听
      */
     protected abstract void setListener();
+
+    public abstract void handleMessage(Message message,int what);
 
     /**
      * 设置toolbar
@@ -271,7 +274,7 @@ public abstract class BaseActivity extends AppCompatActivity implements View.OnC
      * @return FragmentTransaction
      */
     protected FragmentTransaction switchFragment(Fragment targetFragment, int resId) {
-        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         if (!targetFragment.isAdded()) {
             //第一次使用switchFragment()时currentFragment为null，所以要判断一下
             if (currentFragment != null) {
@@ -299,4 +302,20 @@ public abstract class BaseActivity extends AppCompatActivity implements View.OnC
         isAllowScreenRoate = allowScreenRoate;
     }
 
+
+
+    private static class Handler extends BaseHandler{
+
+        private BaseActivity activity;
+
+        Handler(BaseActivity activity){
+            super(activity);
+            this.activity = activity;
+        }
+
+        @Override
+        public void handleMessage(Message msg, int what) {
+            activity.handleMessage(msg,what);
+        }
+    }
 }

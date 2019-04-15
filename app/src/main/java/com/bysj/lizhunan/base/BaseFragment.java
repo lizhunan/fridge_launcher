@@ -1,20 +1,24 @@
 package com.bysj.lizhunan.base;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public abstract class BaseFragment extends Fragment implements View.OnClickListener , BaseHandler.HandlerListener {
+public abstract class BaseFragment extends Fragment implements View.OnClickListener {
 
     protected final String TAG = this.getClass().getSimpleName();
     private View mContextView = null;
-    protected BaseHandler baseHandler;
+    /**
+     * handler
+     */
+    protected Handler handler = new Handler(this);
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -26,8 +30,6 @@ public abstract class BaseFragment extends Fragment implements View.OnClickListe
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mContextView = inflater.inflate(bindLayout(), container, false);
         initView(mContextView);
-        baseHandler = new BaseHandler(this);
-        baseHandler.setHandlerListener(this);
         setListener();
         doBusiness(getContext(), getActivity());
         return mContextView;
@@ -74,6 +76,7 @@ public abstract class BaseFragment extends Fragment implements View.OnClickListe
      */
     protected abstract void setListener();
 
+    public abstract void handleMessage(Message message,int what);
     /**
      * 绑定控件
      *
@@ -99,5 +102,21 @@ public abstract class BaseFragment extends Fragment implements View.OnClickListe
         }
         lastClick = System.currentTimeMillis();
         return true;
+    }
+
+
+    public static class Handler extends BaseHandler{
+
+        private BaseFragment fragment;
+
+        Handler(BaseFragment fragment){
+            super(fragment);
+            this.fragment = fragment;
+        }
+
+        @Override
+        public void handleMessage(Message msg, int what) {
+            fragment.handleMessage(msg,what);
+        }
     }
 }

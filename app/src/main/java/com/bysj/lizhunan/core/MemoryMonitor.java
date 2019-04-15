@@ -3,6 +3,7 @@ package com.bysj.lizhunan.core;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Debug;
+import android.util.Log;
 
 import com.bysj.lizhunan.base.LauncherApplication;
 import com.bysj.lizhunan.bean.App;
@@ -32,15 +33,16 @@ public class MemoryMonitor {
     /**
      * 获取某个进程的Pss
      *
-     * @param processName app的进程名
+     * @param pkgName app的包名名
      * @return Pss实际使用的物理内存 ，-1为错误
      */
-    public static long getAppPss(String processName) {
+    public static long getAppPss(String pkgName) {
+        Log.d("MemoryMonitor","getAppPss:"+pkgName);
         ActivityManager activityManager = (ActivityManager) LauncherApplication.getContext().getSystemService(Context.ACTIVITY_SERVICE);
         List<AndroidAppProcess> list = ProcessManager.getRunningAppProcesses();
         if (list != null) {
             for (AndroidAppProcess androidAppProcess : list) {
-                if (androidAppProcess.name.equals(processName)) {
+                if (androidAppProcess.getPackageName().equals(pkgName)) {
                     Debug.MemoryInfo[] memoryInfos = activityManager.getProcessMemoryInfo(new int[]{androidAppProcess.pid});
                     Debug.MemoryInfo memoryInfo = memoryInfos[0];
                     return memoryInfo.getTotalPss();
@@ -92,8 +94,34 @@ public class MemoryMonitor {
             long totalMemorySize = Integer.parseInt(subMemoryLine.replaceAll(
                     "\\D+", ""));
             long availableSize = getAvailableMemory() / 1024;
+            Log.d("MemoryMonitor","totalMemorySize:"+totalMemorySize+",availableSize:"+availableSize);
             return (int) ((totalMemorySize - availableSize)
                     / (float) totalMemorySize * 100);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * 获取单个进程内存占用率
+     *
+     * @return
+     */
+    public static int getAppMemoryPercent(String processName){
+        String dir = "/proc/meminfo"; // linux下系统目录
+        try {
+            FileReader fr = new FileReader(dir);
+            BufferedReader br = new BufferedReader(fr, 2048);
+            String memoryLine = br.readLine();
+            String subMemoryLine = memoryLine.substring(memoryLine
+                    .indexOf("MemTotal:"));
+            br.close();
+            long totalMemorySize = Integer.parseInt(subMemoryLine.replaceAll(
+                    "\\D+", ""));
+            long useMemorySize = getAppPss(processName);
+            Log.d("MemoryMonitor","totalMemorySize:"+totalMemorySize+",useMemorySize:"+useMemorySize);
+            return (int) (useMemorySize / (float) totalMemorySize * 100);
         } catch (IOException e) {
             e.printStackTrace();
         }

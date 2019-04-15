@@ -2,43 +2,44 @@ package com.bysj.lizhunan.ui.fragment;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
-import android.net.Uri;
-import android.os.Bundle;
 import android.os.Message;
-import android.support.v4.app.Fragment;
+import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.SearchView;
 
 import com.bysj.lizhunan.R;
 import com.bysj.lizhunan.base.BaseFragment;
 import com.bysj.lizhunan.base.What;
 import com.bysj.lizhunan.bean.App;
 import com.bysj.lizhunan.core.MemoryMonitor;
+import com.bysj.lizhunan.presenter.AppsPresenter;
 import com.bysj.lizhunan.unit.LineChartManager;
+import com.bysj.lizhunan.core.LooperTask;
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.Description;
-import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
-public class StatisticsFragment extends BaseFragment {
+public class StatisticsFragment extends BaseFragment implements SearchView.OnQueryTextListener,IGetData<List<App>>{
 
     private static StatisticsFragment INSTANCE;
 
     private LineChart memoryLc, cpuLc, netLc;
+    private FloatingActionButton cleanMemoryBtn;
+    private SearchView searchView;
+    private ProgressBar progressBar;
     private LineChartManager memoryChartManager;
     private LineChartManager cpuChartManager;
     private LineChartManager netChartManager;
+    private LooperTask task;
+    private ScheduledExecutorService pool = Executors.newScheduledThreadPool(1);
+    private AppsPresenter appsPresenter;
 
     public StatisticsFragment() {
 
@@ -61,6 +62,12 @@ public class StatisticsFragment extends BaseFragment {
         memoryLc = $(view, R.id.memory_Chart);
         cpuLc = $(view, R.id.cpu_Chart);
         netLc = $(view, R.id.net_Chart);
+        cleanMemoryBtn = $(view,R.id.clean_memory);
+        searchView = $(view,R.id.app_search);
+        progressBar = $(view,R.id.progress);
+
+        //初始化searchView
+        searchView.setQueryHint(getResources().getString(R.string.search_app_name));
 
         //初始化折线图
         memoryChartManager = new LineChartManager(memoryLc,getResources().getString(R.string.memory),getResources().getColor(R.color.colorTealPrimaryDark));
@@ -69,46 +76,92 @@ public class StatisticsFragment extends BaseFragment {
         memoryChartManager.setYAxis(100, 0, 10);
         cpuChartManager.setYAxis(100, 0, 10);
         netChartManager.setYAxis(100, 0, 10);
+
     }
 
     @Override
     protected void doBusiness(Context mContext, Activity activity) {
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-
-                    int i = MemoryMonitor.getMemoryPercent();
-                    Log.d("tat", "d::" + i);
-                    baseHandler.obtainMessage(What.LINE_CHART_CHANGE,i);
-                    try {
-                        Thread.sleep(3 * 1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
+        appsPresenter = new AppsPresenter(this,handler);
+        task = LooperTask.getINSTANCE(handler);
+        task.setWhat(What.LINE_CHART_CHANGE);
+        pool.scheduleAtFixedRate(task,0,3*1000, TimeUnit.MILLISECONDS);
     }
 
     @Override
     protected void widgetClick(View view) {
-
+        switch (view.getId()){
+            case R.id.clean_memory:
+                MemoryMonitor.cleanMemory();
+                break;
+        }
     }
 
     @Override
     protected void setListener() {
+        cleanMemoryBtn.setOnClickListener(this);
+        searchView.setOnQueryTextListener(this);
+    }
+
+    @Override
+    public void handleMessage(Message message, int what) {
+
+        switch (message.what){
+            case What.LINE_CHART_CHANGE:
+                Log.d("handleMessage:","LINE_CHART_CHANGE:"+message.obj);
+                memoryChartManager.addEntry((Integer) message.obj);
+                break;
+            case What.LINE_CHART_CHANGE_MEMORY:
+                Log.d("handleMessage:","LINE_CHART_CHANGE:"+message.obj);
+                memoryChartManager.addEntry((Integer) message.obj);
+                break;
+        }
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        try{
+            Log.d("onQueryTextSubmit:","onQueryTextSubmit:"+query);
+            appsPresenter.getData(3,query);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        if(newText.equals("")){
+            //输入框里如果什么都没有，默认为查看总数据
+            task.setWhat(What.LINE_CHART_CHANGE);
+            pool.scheduleAtFixedRate(task,0,3*1000, TimeUnit.MILLISECONDS);
+        }
+        return false;
+    }
+
+    @Override
+    public void showSuccess(List<App> appInfo) {
+        task.setSomething(appInfo.get(0).getPackageName());
+        task.setWhat(What.LINE_CHART_CHANGE_MEMORY);
+        pool.scheduleAtFixedRate(task,0,3*1000, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public void showFail() {
 
     }
 
     @Override
-    public void handleMessage(Message message) {
+    public void showProgress() {
+        progressBar.setVisibility(View.VISIBLE);
+    }
 
-        switch (message.what){
-            case What.LINE_CHART_CHANGE:
-                memoryChartManager.addEntry((Integer) message.obj);
-                break;
-        }
+    @Override
+    public void hintProgress() {
+        progressBar.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void refreshUI() {
+
     }
 }

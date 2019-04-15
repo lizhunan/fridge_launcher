@@ -53,6 +53,21 @@ public class AppsHandler {
     }
 
     /**
+     * 获取指定的app
+     * @param appName
+     * @return
+     */
+    public App getAppInfo(String appName){
+        List<PackageInfo> packageInfos = pm.getInstalledPackages(0);
+        for (int i = 0;i<=packageInfos.size();i++) {
+            if(packageInfos.get(i).applicationInfo.name.equals(appName)){
+                return getAppInfo(packageInfos.get(i));
+            }
+        }
+        return null;
+    }
+
+    /**
      * 构造一个appinfo对象
      *
      * @param packageInfo 原始app信息

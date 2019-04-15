@@ -8,11 +8,10 @@ import java.lang.ref.WeakReference;
 /**
  * 封装Handler
  */
-public class BaseHandler extends Handler {
+public abstract class BaseHandler extends Handler {
 
     protected WeakReference<BaseActivity> activityWeakReference;
     protected WeakReference<BaseFragment> fragmentWeakReference;
-    private HandlerListener handlerListener;
 
     public BaseHandler() {
     }
@@ -25,26 +24,24 @@ public class BaseHandler extends Handler {
         this.fragmentWeakReference = new WeakReference<>(baseFragment);
     }
 
-    public void setHandlerListener(HandlerListener handlerListener) {
-        this.handlerListener = handlerListener;
-    }
-
     @Override
     public void handleMessage(Message msg) {
-        if(handlerListener != null){
-            handlerListener.handleMessage(msg);
+        if (activityWeakReference == null || activityWeakReference.get() == null || activityWeakReference.get().isFinishing()) {
+            // 确认Activity是否不可用
+            handleMessage(msg, What.ACTIVITY_GONE);
+        } else if (fragmentWeakReference == null || fragmentWeakReference.get() == null || fragmentWeakReference.get().isRemoving()) {
+            //确认判断Fragment不可用
+            handleMessage(msg, What.ACTIVITY_GONE);
+        } else {
+            handleMessage(msg, msg.what);
         }
     }
 
-
     /**
-     * handler回调接口
+     * 实现抽象方法，处理具体业务
+     * @param msg 信息
+     * @param what What.class
      */
-    public interface HandlerListener {
-        /**
-         * 处理具体业务
-         * @param message 信息
-         */
-        void handleMessage(Message message);
-    }
+    public abstract void handleMessage(Message msg, int what);
+
 }
