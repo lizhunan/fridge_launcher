@@ -1,4 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:key="@string/pref_key_base_settings"
+        android:title="@string/pref_title_base_settings">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_is_ctrl_settings"
+            android:summary="@string/pref_summary_is_ctrl_settings"
+            android:title="@string/pref_title_is_ctrl_settings" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_is_float_settings"
+            android:summary="@string/pref_summary_is_float_settings"
+            android:title="@string/pref_title_is_float_settings" />
+        <SwitchPreference
+            android:key="@string/pref_key_catch_settings"
+            android:summary="@string/pref_summary_catch_settings"
+            android:title="@string/pref_title_catch_settings" />
+    </PreferenceCategory>
 
+    <PreferenceCategory
+        android:key="@string/pref_key_service_settings"
+        android:title="@string/pref_title_service_settings">
+        <Preference
+            android:key="@string/pref_key_open_service_settings"
+            android:summary="@string/pref_summary_open_service_settings"
+            android:title="@string/pref_title_open_service_settings" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="@string/pref_key_abouthelp_settings"
+        android:title="@string/pref_title_abouthelp_settings">
+        <EditTextPreference
+            android:key="@string/pref_key_suggest_settings"
+            android:title="@string/pref_title_suggest_settings" />
+        <Preference
+            android:key="@string/pref_key_opensource_settings"
+            android:title="@string/pref_title_opensource_settings" />
+        <Preference
+            android:key="@string/pref_key_checkipdate_settings"
+            android:summary="@string/pref_summary_checkipdate_settings"
+            android:title="@string/pref_title_checkipdate_settings" />
+        <Preference
+            android:key="@string/pref_key_logout_settings"
+            android:summary="@string/pref_summary_logout_settings"
+            android:title="@string/pref_title_logout_settings" />
+    </PreferenceCategory>
 </PreferenceScreen>

@@ -22,6 +22,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppThemeTealDark"
         tools:ignore="GoogleAppIndexingWarning">
+        <service
+            android:name=".core.CoreService"
+            android:enabled="true"
+            android:exported="true"></service>
+
         <receiver
             android:name=".core.CoreControlReceiver"
             android:enabled="true"

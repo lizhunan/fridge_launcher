@@ -26,7 +26,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 
-public class StatisticsFragment extends BaseFragment implements SearchView.OnQueryTextListener,IGetData<List<App>>{
+public class StatisticsFragment extends BaseFragment implements SearchView.OnQueryTextListener, IGetData<List<App>> {
 
     private static StatisticsFragment INSTANCE;
 
@@ -62,17 +62,17 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
         memoryLc = $(view, R.id.memory_Chart);
         cpuLc = $(view, R.id.cpu_Chart);
         netLc = $(view, R.id.net_Chart);
-        cleanMemoryBtn = $(view,R.id.clean_memory);
-        searchView = $(view,R.id.app_search);
-        progressBar = $(view,R.id.progress);
+        cleanMemoryBtn = $(view, R.id.clean_memory);
+        searchView = $(view, R.id.app_search);
+        progressBar = $(view, R.id.progress);
 
         //初始化searchView
         searchView.setQueryHint(getResources().getString(R.string.search_app_name));
 
         //初始化折线图
-        memoryChartManager = new LineChartManager(memoryLc,getResources().getString(R.string.memory),getResources().getColor(R.color.colorTealPrimaryDark));
-        cpuChartManager = new LineChartManager(cpuLc,getResources().getString(R.string.cpu),getResources().getColor(R.color.colorTealPrimaryDark));
-        netChartManager = new LineChartManager(netLc,getResources().getString(R.string.net),getResources().getColor(R.color.colorTealPrimaryDark));
+        memoryChartManager = new LineChartManager(memoryLc, getResources().getString(R.string.memory), getResources().getColor(R.color.colorTealPrimaryDark));
+        cpuChartManager = new LineChartManager(cpuLc, getResources().getString(R.string.cpu), getResources().getColor(R.color.colorTealPrimaryDark));
+        netChartManager = new LineChartManager(netLc, getResources().getString(R.string.net), getResources().getColor(R.color.colorTealPrimaryDark));
         memoryChartManager.setYAxis(100, 0, 10);
         cpuChartManager.setYAxis(100, 0, 10);
         netChartManager.setYAxis(100, 0, 10);
@@ -81,15 +81,15 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
 
     @Override
     protected void doBusiness(Context mContext, Activity activity) {
-        appsPresenter = new AppsPresenter(this,handler);
+        appsPresenter = new AppsPresenter(this, handler);
         task = LooperTask.getINSTANCE(handler);
         task.setWhat(What.LINE_CHART_CHANGE);
-        pool.scheduleAtFixedRate(task,0,3*1000, TimeUnit.MILLISECONDS);
+        pool.scheduleAtFixedRate(task, 0, 3 * 1000, TimeUnit.MILLISECONDS);
     }
 
     @Override
     protected void widgetClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.clean_memory:
                 MemoryMonitor.cleanMemory();
                 break;
@@ -105,13 +105,13 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
     @Override
     public void handleMessage(Message message, int what) {
 
-        switch (message.what){
+        switch (message.what) {
             case What.LINE_CHART_CHANGE:
-                Log.d("handleMessage:","LINE_CHART_CHANGE:"+message.obj);
+                Log.d("handleMessage:", "LINE_CHART_CHANGE:" + message.obj);
                 memoryChartManager.addEntry((Integer) message.obj);
                 break;
             case What.LINE_CHART_CHANGE_MEMORY:
-                Log.d("handleMessage:","LINE_CHART_CHANGE:"+message.obj);
+                Log.d("handleMessage:", "LINE_CHART_CHANGE:" + message.obj);
                 memoryChartManager.addEntry((Integer) message.obj);
                 break;
         }
@@ -119,10 +119,10 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        try{
-            Log.d("onQueryTextSubmit:","onQueryTextSubmit:"+query);
-            appsPresenter.getData(3,query);
-        }catch (Exception e){
+        try {
+            Log.d("onQueryTextSubmit:", "onQueryTextSubmit:" + query);
+            appsPresenter.getData(3, query);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
@@ -130,10 +130,10 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        if(newText.equals("")){
+        if (newText.equals("")) {
             //输入框里如果什么都没有，默认为查看总数据
             task.setWhat(What.LINE_CHART_CHANGE);
-            pool.scheduleAtFixedRate(task,0,3*1000, TimeUnit.MILLISECONDS);
+            pool.scheduleAtFixedRate(task, 0, 3 * 1000, TimeUnit.MILLISECONDS);
         }
         return false;
     }
@@ -142,7 +142,7 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
     public void showSuccess(List<App> appInfo) {
         task.setSomething(appInfo.get(0).getPackageName());
         task.setWhat(What.LINE_CHART_CHANGE_MEMORY);
-        pool.scheduleAtFixedRate(task,0,3*1000, TimeUnit.MILLISECONDS);
+        pool.scheduleAtFixedRate(task, 0, 3 * 1000, TimeUnit.MILLISECONDS);
     }
 
     @Override

@@ -13,21 +13,21 @@ import java.util.TimerTask;
 /**
  * 循环绘制折线图任务
  */
-        public class LooperTask extends TimerTask {
+public class LooperTask extends TimerTask {
 
     private static LooperTask INSTANCE;
     private BaseHandler handler;
     private int what;
     private String pkgName;
 
-    public static LooperTask getINSTANCE(BaseHandler handler){
-        if(INSTANCE == null){
+    public static LooperTask getINSTANCE(BaseHandler handler) {
+        if (INSTANCE == null) {
             INSTANCE = new LooperTask(handler);
         }
         return INSTANCE;
     }
 
-    public LooperTask(BaseHandler handler){
+    public LooperTask(BaseHandler handler) {
         this.handler = handler;
     }
 
@@ -41,20 +41,20 @@ import java.util.TimerTask;
 
     @Override
     public void run() {
-        Log.d("LooperTask:","run");
+        Log.d("LooperTask:", "run");
         Message message = handler.obtainMessage();
-        switch (what){
+        switch (what) {
             case What.LINE_CHART_CHANGE:
                 int i1 = MemoryMonitor.getMemoryPercent();
                 message.obj = i1;
-                message.what=What.LINE_CHART_CHANGE;
+                message.what = What.LINE_CHART_CHANGE;
                 handler.sendMessage(message);
                 break;
             case What.LINE_CHART_CHANGE_MEMORY:
-                Log.d("LooperTask:","LINE_CHART_CHANGE_MEMORY");
+                Log.d("LooperTask:", "LINE_CHART_CHANGE_MEMORY");
                 int i2 = MemoryMonitor.getAppMemoryPercent(pkgName);
                 message.obj = i2;
-                message.what=What.LINE_CHART_CHANGE_MEMORY;
+                message.what = What.LINE_CHART_CHANGE_MEMORY;
                 handler.sendMessage(message);
                 break;
         }

@@ -11,10 +11,44 @@
     <string name="no_chart_line_data">无后台数据</string>
     <string name="search_app_name">搜索应用名</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="hight_limit">高限制线</string>
     <string name="title_activity_settings">Settings</string>
+    <string name="name_app">应用名称</string>
+    <string name="process_app">进程名</string>
+    <string name="pkg_name">程序包名</string>
+    <string name="ctrl_ing">正在管控</string>
+    <string name="no_ctrl">无管控</string>
+    <string name="size_app">应用大小</string>
+    <string name="version_app">应用版本</string>
 
 
+    <string name="pref_key_base_settings">pref_key_base_settings</string>
+    <string name="pref_title_base_settings">基本设置</string>
+    <string name="pref_key_is_ctrl_settings">pref_key_is_ctrl_settings</string>
+    <string name="pref_summary_is_ctrl_settings">是否启动管控</string>
+    <string name="pref_title_is_ctrl_settings">系统管控</string>
+    <string name="pref_key_is_float_settings">pref_key_is_float_settings</string>
+    <string name="pref_summary_is_float_settings">是否启动监控悬浮窗</string>
+    <string name="pref_title_is_float_settings">监控悬浮窗</string>
+    <string name="pref_key_catch_settings">pref_key_catch_settings</string>
+    <string name="pref_summary_catch_settings">是否采集系统数据并上传服务器</string>
+    <string name="pref_title_catch_settings">采集数据</string>
+    <string name="pref_key_service_settings">pref_key_service_settings</string>
+    <string name="pref_title_service_settings">系统服务</string>
+    <string name="pref_key_open_service_settings">pref_key_open_service_settings</string>
+    <string name="pref_summary_open_service_settings">进入服务器网页并查看数据</string>
+    <string name="pref_title_open_service_settings">打开服务器</string>
+    <string name="pref_key_abouthelp_settings">pref_key_abouthelp_settings</string>
+    <string name="pref_title_abouthelp_settings">关于与帮助</string>
+    <string name="pref_key_suggest_settings">pref_key_suggest_settings</string>
+    <string name="pref_title_suggest_settings">反馈建议</string>
+    <string name="pref_key_opensource_settings">pref_key_opensource_settings</string>
+    <string name="pref_title_opensource_settings">开源许可</string>
+    <string name="pref_key_checkipdate_settings">pref_key_checkipdate_settings</string>
+    <string name="pref_summary_checkipdate_settings">当前版本</string>
+    <string name="pref_title_checkipdate_settings">检查更新</string>
+    <string name="pref_key_logout_settings">pref_key_logout_settings</string>
+    <string name="pref_summary_logout_settings">解除当前管控并释放所有应用</string>
+    <string name="pref_title_logout_settings">解除管控</string>
 </resources>

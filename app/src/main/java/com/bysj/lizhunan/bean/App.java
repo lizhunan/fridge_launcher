@@ -16,6 +16,7 @@ public class App {
     private String size;
     private Drawable image;
     private String version;
+    private boolean isCtrl;
 
     public String getId() {
         return id;
@@ -71,5 +72,13 @@ public class App {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public boolean isCtrl() {
+        return isCtrl;
+    }
+
+    public void setCtrl(boolean ctrl) {
+        isCtrl = ctrl;
     }
 }
