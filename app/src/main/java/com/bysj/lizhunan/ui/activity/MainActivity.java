@@ -1,6 +1,7 @@
 package com.bysj.lizhunan.ui.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Message;
@@ -8,6 +9,7 @@ import android.support.annotation.NonNull;
 
 import com.bysj.lizhunan.R;
 import com.bysj.lizhunan.base.BaseActivity;
+import com.bysj.lizhunan.core.CoreService;
 import com.bysj.lizhunan.ui.fragment.AppsFragment;
 import com.bysj.lizhunan.ui.fragment.SettingFragment;
 import com.bysj.lizhunan.ui.fragment.StatisticsFragment;
@@ -59,7 +61,6 @@ public class MainActivity extends BaseActivity implements
 
     @Override
     protected void doBusiness(Context mContext) {
-
     }
 
     @Override

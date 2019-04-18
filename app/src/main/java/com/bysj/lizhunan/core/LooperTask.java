@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.bysj.lizhunan.base.BaseHandler;
 import com.bysj.lizhunan.base.What;
+import com.bysj.lizhunan.bean.Used;
 import com.bysj.lizhunan.core.MemoryMonitor;
 
 import java.util.Timer;
@@ -43,18 +44,22 @@ public class LooperTask extends TimerTask {
     public void run() {
         Log.d("LooperTask:", "run");
         Message message = handler.obtainMessage();
+        Used used = new Used();
         switch (what) {
-            case What.LINE_CHART_CHANGE:
-                int i1 = MemoryMonitor.getMemoryPercent();
-                message.obj = i1;
-                message.what = What.LINE_CHART_CHANGE;
+            case What.USED_DATA_CHANGE:
+                used.setMemoryPer( MemoryMonitor.getMemoryPercent());
+                used.setMemoryUsed((int) (MemoryMonitor.getTotalSize() - MemoryMonitor.getAvailableMemory()/1024));
+                message.obj = used;
+                message.what = What.USED_DATA_CHANGE;
                 handler.sendMessage(message);
                 break;
-            case What.LINE_CHART_CHANGE_MEMORY:
+            case What.PROCESS_USED_DATA_CHANGE:
                 Log.d("LooperTask:", "LINE_CHART_CHANGE_MEMORY");
-                int i2 = MemoryMonitor.getAppMemoryPercent(pkgName);
-                message.obj = i2;
-                message.what = What.LINE_CHART_CHANGE_MEMORY;
+                used.setMemoryPer( MemoryMonitor.getMemoryPercent());
+                used.setCurrMemory(MemoryMonitor.getAppMemoryPercent(pkgName));
+                used.setMemoryUsed((int) MemoryMonitor.getAppPss(pkgName));
+                message.obj = used;
+                message.what = What.PROCESS_USED_DATA_CHANGE;
                 handler.sendMessage(message);
                 break;
         }

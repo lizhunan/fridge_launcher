@@ -104,6 +104,28 @@ public class MemoryMonitor {
     }
 
     /**
+     * 获取总内存大小
+     * @return
+     */
+    public static int getTotalSize(){
+        String dir = "/proc/meminfo"; // linux下系统目录
+        try {
+            FileReader fr = new FileReader(dir);
+            BufferedReader br = new BufferedReader(fr, 2048);
+            String memoryLine = br.readLine();
+            String subMemoryLine = memoryLine.substring(memoryLine
+                    .indexOf("MemTotal:"));
+            br.close();
+            long totalMemorySize = Integer.parseInt(subMemoryLine.replaceAll(
+                    "\\D+", ""));
+            return (int) totalMemorySize;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
      * 获取单个进程内存占用率
      *
      * @return

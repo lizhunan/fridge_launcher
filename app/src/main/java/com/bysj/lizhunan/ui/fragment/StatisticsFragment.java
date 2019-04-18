@@ -2,6 +2,7 @@ package com.bysj.lizhunan.ui.fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
@@ -11,8 +12,10 @@ import android.widget.SearchView;
 
 import com.bysj.lizhunan.R;
 import com.bysj.lizhunan.base.BaseFragment;
+import com.bysj.lizhunan.base.Constants;
 import com.bysj.lizhunan.base.What;
 import com.bysj.lizhunan.bean.App;
+import com.bysj.lizhunan.core.CoreService;
 import com.bysj.lizhunan.core.MemoryMonitor;
 import com.bysj.lizhunan.presenter.AppsPresenter;
 import com.bysj.lizhunan.unit.LineChartManager;
@@ -82,9 +85,10 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
     @Override
     protected void doBusiness(Context mContext, Activity activity) {
         appsPresenter = new AppsPresenter(this, handler);
-        task = LooperTask.getINSTANCE(handler);
-        task.setWhat(What.LINE_CHART_CHANGE);
-        pool.scheduleAtFixedRate(task, 0, 3 * 1000, TimeUnit.MILLISECONDS);
+
+        Intent intent = new Intent(getActivity(), CoreService.class);
+        intent.setAction(Constants.START_CORE_SERVICE);
+        getActivity().startService(intent);
     }
 
     @Override
@@ -106,11 +110,11 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
     public void handleMessage(Message message, int what) {
 
         switch (message.what) {
-            case What.LINE_CHART_CHANGE:
+            case What.USED_DATA_CHANGE:
                 Log.d("handleMessage:", "LINE_CHART_CHANGE:" + message.obj);
                 memoryChartManager.addEntry((Integer) message.obj);
                 break;
-            case What.LINE_CHART_CHANGE_MEMORY:
+            case What.PROCESS_USED_DATA_CHANGE:
                 Log.d("handleMessage:", "LINE_CHART_CHANGE:" + message.obj);
                 memoryChartManager.addEntry((Integer) message.obj);
                 break;
@@ -132,17 +136,19 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
     public boolean onQueryTextChange(String newText) {
         if (newText.equals("")) {
             //输入框里如果什么都没有，默认为查看总数据
-            task.setWhat(What.LINE_CHART_CHANGE);
-            pool.scheduleAtFixedRate(task, 0, 3 * 1000, TimeUnit.MILLISECONDS);
+            Intent intent = new Intent(getActivity(), CoreService.class);
+            intent.setAction(Constants.START_CORE_SERVICE);
+            getActivity().startService(intent);
         }
         return false;
     }
 
     @Override
     public void showSuccess(List<App> appInfo) {
-        task.setSomething(appInfo.get(0).getPackageName());
-        task.setWhat(What.LINE_CHART_CHANGE_MEMORY);
-        pool.scheduleAtFixedRate(task, 0, 3 * 1000, TimeUnit.MILLISECONDS);
+        Intent intent = new Intent(getActivity(), CoreService.class);
+        intent.putExtra(Constants.START_CHANGE_CORE_SERVICE,appInfo.get(0).getPackageName());
+        intent.setAction(Constants.START_CHANGE_CORE_SERVICE);
+        getActivity().startService(intent);
     }
 
     @Override
