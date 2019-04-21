@@ -12,8 +12,8 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
 
     <application
         android:name=".base.LauncherApplication"
@@ -24,10 +24,24 @@
         android:supportsRtl="true"
         android:theme="@style/AppThemeTealDark"
         tools:ignore="GoogleAppIndexingWarning">
+        <receiver android:name=".widget.ShowCtrlAppsWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <!-- GridWidgetProvider接收点击gridview的响应事件 -->
+                <action android:name="com.skywang.test.COLLECTION_VIEW_ACTION" />
+                <!-- GridWidgetProvider接收点击bt_refresh的响应事件 -->
+                <action android:name="com.skywang.test.BT_REFRESH_ACTION" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/show_ctrl_apps_widget_info" />
+        </receiver>
+
         <service
             android:name=".core.CoreService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <receiver
             android:name=".core.CoreControlReceiver"
@@ -55,6 +69,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".widget.GridWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
     </application>
 
 </manifest>

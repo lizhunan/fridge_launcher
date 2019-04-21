@@ -1,4 +1,4 @@
-package com.bysj.lizhunan.unit;
+package com.bysj.lizhunan.widget;
 
 import com.bysj.lizhunan.R;
 import com.bysj.lizhunan.base.LauncherApplication;
@@ -11,7 +11,6 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 

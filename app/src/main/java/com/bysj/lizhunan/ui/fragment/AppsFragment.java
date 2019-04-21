@@ -12,18 +12,21 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ProgressBar;
 
 import com.bysj.lizhunan.R;
 import com.bysj.lizhunan.base.BaseFragment;
+import com.bysj.lizhunan.base.LauncherApplication;
 import com.bysj.lizhunan.bean.App;
 import com.bysj.lizhunan.presenter.AppsPresenter;
 import com.bysj.lizhunan.ui.fragment.adapter.AppListAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
-public class AppsFragment extends BaseFragment implements IGetData<List<App>>{
+public class AppsFragment extends BaseFragment implements IGetData<List<App>>, AppListAdapter.OnCheckedCtrlListener {
 
     public static AppsFragment INSTANCE;
 
@@ -31,6 +34,7 @@ public class AppsFragment extends BaseFragment implements IGetData<List<App>>{
     private ProgressBar progressBar;
     private AppsPresenter appsPresenter;
     private AppListAdapter appListAdapter;
+    private List<App> apps = new ArrayList<>();
 
     public AppsFragment() {
 
@@ -38,7 +42,7 @@ public class AppsFragment extends BaseFragment implements IGetData<List<App>>{
 
 
     public static AppsFragment newInstance() {
-        if(INSTANCE == null) {
+        if (INSTANCE == null) {
             INSTANCE = new AppsFragment();
         }
         return INSTANCE;
@@ -57,17 +61,17 @@ public class AppsFragment extends BaseFragment implements IGetData<List<App>>{
 
     @Override
     protected void initView(View view) {
-        appsList = $(view,R.id.apps_list);
-        progressBar = $(view,R.id.progress);
+        appsList = $(view, R.id.apps_list);
+        progressBar = $(view, R.id.progress);
         appsList.setLayoutManager(new LinearLayoutManager(getActivity()));
+        appListAdapter = new AppListAdapter(getActivity());
     }
 
     @Override
     protected void doBusiness(Context mContext, Activity activity) {
-        appsPresenter = new AppsPresenter(this,handler);
-        appListAdapter = new AppListAdapter(getActivity());
+        appsPresenter = new AppsPresenter(this, handler);
         appsList.setAdapter(appListAdapter);
-        appsPresenter.getData(1,null);
+        appsPresenter.getData(1, null);
     }
 
     @Override
@@ -77,7 +81,7 @@ public class AppsFragment extends BaseFragment implements IGetData<List<App>>{
 
     @Override
     protected void setListener() {
-
+        appListAdapter.setOnCheckedCtrlListener(this);
     }
 
     @Override
@@ -85,13 +89,15 @@ public class AppsFragment extends BaseFragment implements IGetData<List<App>>{
 
     }
 
+    @Override
+    public void onCtrlChanged(CompoundButton compoundButton, boolean b, int position) {
+        LauncherApplication.mDPM.setApplicationHidden(LauncherApplication.mComponentName, apps.get(position).getPackageName(), b);
+    }
 
     @Override
     public void showSuccess(List<App> appInfos) {
-        for (int i = 0; i < appInfos.size(); i++) {
-            Log.d("aa",":"+appInfos.get(i).getAppName());
-        }
-
+        apps.clear();
+        apps.addAll(appInfos);
         appListAdapter.updateListView(appInfos);
     }
 
@@ -114,4 +120,5 @@ public class AppsFragment extends BaseFragment implements IGetData<List<App>>{
     public void refreshUI() {
 
     }
+
 }

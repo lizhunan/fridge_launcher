@@ -37,6 +37,17 @@ public class AppModel {
         return appInfo;
     }
 
+    private App getAppInfos(PackageInfo packageInfo){
+        App appInfo = new App();
+        appInfo.setAppName((String) packageInfo.applicationInfo.loadLabel(pm));
+        appInfo.setPackageName(packageInfo.applicationInfo.packageName);
+        appInfo.setImage(packageInfo.applicationInfo.loadIcon(pm));
+        appInfo.setProcessName(packageInfo.applicationInfo.processName);
+        appInfo.setVersion(packageInfo.versionName);
+        appInfo.setCtrl(LauncherApplication.mDPM.isApplicationHidden(LauncherApplication.mComponentName,packageInfo.packageName));
+        return appInfo;
+    }
+
     public void data(final int i, final OnGetAppInfo onGetAppInfo, final String appName) {
         final List<App> appInfos = new ArrayList<App>(); // 保存过滤查到的AppInfo
         new Thread(new Runnable() {
@@ -78,7 +89,7 @@ public class AppModel {
                         onGetAppInfo.onSuccess(appInfos);
                         break;
                     case 2:
-                        List<PackageInfo> hiddenApp = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES);//查询所有app
+                        List<PackageInfo> hiddenApp = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES);
                         appInfos.clear();
                         for (int j = 0; j < hiddenApp.size(); j++) {
                             if (LauncherApplication.mDPM.isApplicationHidden(LauncherApplication.mComponentName, hiddenApp.get(j).packageName)) {
@@ -109,6 +120,14 @@ public class AppModel {
                             onGetAppInfo.onLoaded();
                             onGetAppInfo.onSuccess(appInfos);
                         }
+                    case 4:
+                        List<PackageInfo> allApp = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES);//查询所有app
+                        appInfos.clear();
+                        for (int j = 0; j < allApp.size(); j++) {
+                            appInfos.add(getAppInfos(allApp.get(j)));
+                        }
+                        onGetAppInfo.onLoaded();
+                        onGetAppInfo.onSuccess(appInfos);
                         break;
                 }
             }

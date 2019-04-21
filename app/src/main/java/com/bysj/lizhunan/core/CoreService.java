@@ -7,6 +7,8 @@ import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.constraint.ConstraintLayout;
 import android.util.Log;
 import android.view.Gravity;
@@ -21,6 +23,7 @@ import com.bysj.lizhunan.base.BaseHandler;
 import com.bysj.lizhunan.base.Constants;
 import com.bysj.lizhunan.base.What;
 import com.bysj.lizhunan.bean.Used;
+import com.bysj.lizhunan.ui.fragment.StatisticsFragment;
 
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -97,6 +100,7 @@ public class CoreService extends Service implements View.OnTouchListener {
         return null;
     }
 
+
     /**
      * 创建悬浮窗
      */
@@ -170,24 +174,30 @@ public class CoreService extends Service implements View.OnTouchListener {
         super.onDestroy();
     }
 
+
     public static class CoreHandler extends BaseHandler {
 
         @Override
         public void handleMessage(Message msg, int what) {
+            Message message = StatisticsFragment.mHandler.obtainMessage();
             switch (msg.what) {
                 case What.USED_DATA_CHANGE:
                     Log.d("handleMessage:", "LINE_CHART_CHANGE:" + msg.obj);
                     Used used1 = (Used) msg.obj;
                     descView.setText("总内存：" + MemoryMonitor.getTotalSize() + "\n" + "可使用内存：" + MemoryMonitor.getAvailableMemory() / 1024 + "\n" +
-                            "已使用内存："+used1.getMemoryUsed()+"\n"+"当前内存使用百分比：" + used1.getMemoryPer() + "%\n");
+                            "已使用内存：" + used1.getMemoryUsed() + "\n" + "当前内存使用百分比：" + used1.getMemoryPer() + "%\n");
                     //memoryChartManager.addEntry((Integer) message.obj);
+
+                    message.what = What.LINE_CHART_CHANGE;
+                    message.obj = used1;
+                    StatisticsFragment.mHandler.sendMessage(message);
                     break;
                 case What.PROCESS_USED_DATA_CHANGE:
                     Log.d("handleMessage:", "LINE_CHART_CHANGE:" + msg.obj);
                     Used used2 = (Used) msg.obj;
                     descView.setText("总内存：" + MemoryMonitor.getTotalSize() + "\n" + "可使用内存：" + MemoryMonitor.getAvailableMemory() / 1024 + "\n" +
-                            "当前进程已使用内存："+used2.getMemoryUsed()+"\n"+"当前内存使用百分比：" + used2.getMemoryPer() + "%\n" +
-                            "当前进程内存使用情况：" + used2.getCurrMemory()+ "%\n");
+                            "当前进程已使用内存：" + used2.getMemoryUsed() + "\n" + "当前内存使用百分比：" + used2.getMemoryPer() + "%\n" +
+                            "当前进程内存使用情况：" + used2.getCurrMemory() + "%\n");
                     //memoryChartManager.addEntry((Integer) message.obj);
                     break;
             }

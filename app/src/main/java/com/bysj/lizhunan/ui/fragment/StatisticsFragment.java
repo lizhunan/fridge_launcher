@@ -15,18 +15,17 @@ import com.bysj.lizhunan.base.BaseFragment;
 import com.bysj.lizhunan.base.Constants;
 import com.bysj.lizhunan.base.What;
 import com.bysj.lizhunan.bean.App;
+import com.bysj.lizhunan.bean.Used;
 import com.bysj.lizhunan.core.CoreService;
 import com.bysj.lizhunan.core.MemoryMonitor;
 import com.bysj.lizhunan.presenter.AppsPresenter;
-import com.bysj.lizhunan.unit.LineChartManager;
+import com.bysj.lizhunan.widget.LineChartManager;
 import com.bysj.lizhunan.core.LooperTask;
 import com.github.mikephil.charting.charts.LineChart;
 
 import java.util.List;
-import java.util.Timer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 
 public class StatisticsFragment extends BaseFragment implements SearchView.OnQueryTextListener, IGetData<List<App>> {
@@ -43,6 +42,7 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
     private LooperTask task;
     private ScheduledExecutorService pool = Executors.newScheduledThreadPool(1);
     private AppsPresenter appsPresenter;
+    public static Handler mHandler;
 
     public StatisticsFragment() {
 
@@ -85,7 +85,7 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
     @Override
     protected void doBusiness(Context mContext, Activity activity) {
         appsPresenter = new AppsPresenter(this, handler);
-
+        mHandler = handler;
         Intent intent = new Intent(getActivity(), CoreService.class);
         intent.setAction(Constants.START_CORE_SERVICE);
         getActivity().startService(intent);
@@ -118,6 +118,11 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
                 Log.d("handleMessage:", "LINE_CHART_CHANGE:" + message.obj);
                 memoryChartManager.addEntry((Integer) message.obj);
                 break;
+            case What.LINE_CHART_CHANGE:
+                Log.d("handleMessage:", "LINE_CHART_CHANGE:" + message.obj);
+                Used used = (Used)message.obj;
+                memoryChartManager.addEntry(used.getMemoryPer());
+                break;
         }
     }
 
@@ -146,7 +151,7 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
     @Override
     public void showSuccess(List<App> appInfo) {
         Intent intent = new Intent(getActivity(), CoreService.class);
-        intent.putExtra(Constants.START_CHANGE_CORE_SERVICE,appInfo.get(0).getPackageName());
+        intent.putExtra(Constants.START_CHANGE_CORE_SERVICE, appInfo.get(0).getPackageName());
         intent.setAction(Constants.START_CHANGE_CORE_SERVICE);
         getActivity().startService(intent);
     }

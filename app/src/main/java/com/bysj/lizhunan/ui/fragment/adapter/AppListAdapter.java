@@ -1,6 +1,7 @@
 package com.bysj.lizhunan.ui.fragment.adapter;
 
 import android.content.Context;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -15,10 +16,16 @@ import java.util.List;
 
 public class AppListAdapter extends BaseListAdapter<App> {
 
-    private List<App> appList = new ArrayList<>();
+    private OnCheckedCtrlListener onCheckedCtrlListener;
+    private Context context;
 
     public AppListAdapter(Context mContext) {
         super(mContext);
+        this.context = mContext;
+    }
+
+    public void setOnCheckedCtrlListener(OnCheckedCtrlListener onCheckedCtrlListener) {
+        this.onCheckedCtrlListener = onCheckedCtrlListener;
     }
 
     @Override
@@ -27,16 +34,16 @@ public class AppListAdapter extends BaseListAdapter<App> {
     }
 
     @Override
-    public void onBindItemHolder(BaseViewHolder holder, int position) {
+    public void onBindItemHolder(BaseViewHolder holder, final int position) {
         TextView appName = holder.getView(R.id.app_name);
         TextView appProcess = holder.getView(R.id.app_process);
         TextView appPkg = holder.getView(R.id.app_pkg);
         TextView appVer = holder.getView(R.id.app_ver);
         TextView appSize = holder.getView(R.id.app_size);
-        Switch ctrlSt = holder.getView(R.id.is_ctrl_st);
+        final Switch ctrlSt = holder.getView(R.id.is_ctrl_st);
         ImageView appIcon = holder.getView(R.id.app_iv);
 
-        App app = getDataList().get(position);
+        final App app = getDataList().get(position);
 
         appName.setText(app.getAppName());
         appProcess.setText(app.getProcessName());
@@ -44,6 +51,27 @@ public class AppListAdapter extends BaseListAdapter<App> {
         appVer.setText(app.getVersion());
         appSize.setText(app.getSize());
         ctrlSt.setChecked(app.isCtrl());
+        if (app.isCtrl()) {
+            ctrlSt.setText(context.getResources().getString(R.string.ctrl_ing));
+        }else {
+            ctrlSt.setText(context.getResources().getString(R.string.no_ctrl));
+        }
         appIcon.setImageDrawable(app.getImage());
+        ctrlSt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    ctrlSt.setText(context.getResources().getString(R.string.ctrl_ing));
+                }else {
+                    ctrlSt.setText(context.getResources().getString(R.string.no_ctrl));
+                }
+                onCheckedCtrlListener.onCtrlChanged(compoundButton,b,position);
+            }
+        });
+
+    }
+
+    public interface OnCheckedCtrlListener{
+        void onCtrlChanged(CompoundButton compoundButton,boolean b,int position);
     }
 }
