@@ -9,7 +9,7 @@ public class Used {
     private int cpuUsed;
     private int netUsed;
     private int memoryPer;
-    private int cpuPer;
+    private double cpuPer;
     private int netPer;
     private int currMemory;
     private int currCpu;
@@ -47,11 +47,11 @@ public class Used {
         this.memoryPer = memoryPer;
     }
 
-    public int getCpuPer() {
+    public double getCpuPer() {
         return cpuPer;
     }
 
-    public void setCpuPer(int cpuPer) {
+    public void setCpuPer(double cpuPer) {
         this.cpuPer = cpuPer;
     }
 

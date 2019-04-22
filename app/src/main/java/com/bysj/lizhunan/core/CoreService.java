@@ -184,21 +184,35 @@ public class CoreService extends Service implements View.OnTouchListener {
                 case What.USED_DATA_CHANGE:
                     Log.d("handleMessage:", "LINE_CHART_CHANGE:" + msg.obj);
                     Used used1 = (Used) msg.obj;
-                    descView.setText("总内存：" + MemoryMonitor.getTotalSize() + "\n" + "可使用内存：" + MemoryMonitor.getAvailableMemory() / 1024 + "\n" +
-                            "已使用内存：" + used1.getMemoryUsed() + "\n" + "当前内存使用百分比：" + used1.getMemoryPer() + "%\n");
-                    //memoryChartManager.addEntry((Integer) message.obj);
-
+                    if (used1.getCpuPer() > 0 && used1.getCpuPer() < 1) {
+                        used1.setCpuPer(1.0);
+                    }
+                    if (used1.getCurrNet() >= 1048576d) {
+                        used1.setCurrNet((int) (used1.getCurrNet() / 1048576d));
+                    } else {
+                        used1.setCurrNet((int) (used1.getCurrNet() / 1024d));
+                    }
+                    descView.setText("总内存：" + MemoryMonitor.getTotalSize() + "\n" +
+                            "可使用内存：" + MemoryMonitor.getAvailableMemory() / 1024 + "\n" +
+                            "已使用内存：" + used1.getMemoryUsed() + "\n" +
+                            "当前内存使用百分比：" + used1.getMemoryPer() + "%\n" + "" +
+                            "当前CPU使用百分比" + used1.getCpuPer() + "%\n" +
+                            "当前网速" + used1.getCurrNet());
                     message.what = What.LINE_CHART_CHANGE;
                     message.obj = used1;
                     StatisticsFragment.mHandler.sendMessage(message);
                     break;
                 case What.PROCESS_USED_DATA_CHANGE:
-                    Log.d("handleMessage:", "LINE_CHART_CHANGE:" + msg.obj);
+                    Log.d("handleMessage:", "LINE_CHART_PROCESS_CHANGE:" + msg.obj);
                     Used used2 = (Used) msg.obj;
-                    descView.setText("总内存：" + MemoryMonitor.getTotalSize() + "\n" + "可使用内存：" + MemoryMonitor.getAvailableMemory() / 1024 + "\n" +
-                            "当前进程已使用内存：" + used2.getMemoryUsed() + "\n" + "当前内存使用百分比：" + used2.getMemoryPer() + "%\n" +
+                    descView.setText("总内存：" + MemoryMonitor.getTotalSize() + "\n" +
+                            "可使用内存：" + MemoryMonitor.getAvailableMemory() / 1024 + "\n" +
+                            "当前进程已使用内存：" + used2.getMemoryUsed() + "\n" +
+                            "当前内存使用百分比：" + used2.getMemoryPer() + "%\n" +
                             "当前进程内存使用情况：" + used2.getCurrMemory() + "%\n");
-                    //memoryChartManager.addEntry((Integer) message.obj);
+                    message.what = What.LINE_CHART_PROCESS_CHANGE;
+                    message.obj = used2;
+                    StatisticsFragment.mHandler.sendMessage(message);
                     break;
             }
         }

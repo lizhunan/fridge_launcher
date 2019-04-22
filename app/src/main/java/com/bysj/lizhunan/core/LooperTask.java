@@ -4,6 +4,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.bysj.lizhunan.base.BaseHandler;
+import com.bysj.lizhunan.base.LauncherApplication;
 import com.bysj.lizhunan.base.What;
 import com.bysj.lizhunan.bean.Used;
 import com.bysj.lizhunan.core.MemoryMonitor;
@@ -47,8 +48,10 @@ public class LooperTask extends TimerTask {
         Used used = new Used();
         switch (what) {
             case What.USED_DATA_CHANGE:
+                used.setCpuPer(CpuMonitor.getINSTANCE().getThisCpu());
                 used.setMemoryPer( MemoryMonitor.getMemoryPercent());
                 used.setMemoryUsed((int) (MemoryMonitor.getTotalSize() - MemoryMonitor.getAvailableMemory()/1024));
+                used.setCurrNet((int) NetMonitor.getINSTANCE().getNetSpeedBytes());
                 message.obj = used;
                 message.what = What.USED_DATA_CHANGE;
                 handler.sendMessage(message);

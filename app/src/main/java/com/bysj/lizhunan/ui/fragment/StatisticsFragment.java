@@ -111,17 +111,21 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
 
         switch (message.what) {
             case What.USED_DATA_CHANGE:
-                Log.d("handleMessage:", "LINE_CHART_CHANGE:" + message.obj);
-                memoryChartManager.addEntry((Integer) message.obj);
+                Log.d("handleMessage:", "USED_DATA_CHANGE:" + message.obj);
+                Used used1 = (Used) message.obj;
+                memoryChartManager.addEntry(used1.getMemoryPer());
                 break;
-            case What.PROCESS_USED_DATA_CHANGE:
-                Log.d("handleMessage:", "LINE_CHART_CHANGE:" + message.obj);
-                memoryChartManager.addEntry((Integer) message.obj);
+            case What.LINE_CHART_PROCESS_CHANGE:
+                Log.d("handleMessage:", "PROCESS_USED_DATA_CHANGE:" + message.obj);
+                Used used2 = (Used)message.obj;
+                memoryChartManager.addEntry(used2.getCurrMemory());
                 break;
             case What.LINE_CHART_CHANGE:
                 Log.d("handleMessage:", "LINE_CHART_CHANGE:" + message.obj);
-                Used used = (Used)message.obj;
-                memoryChartManager.addEntry(used.getMemoryPer());
+                Used used3 = (Used)message.obj;
+                memoryChartManager.addEntry(used3.getMemoryPer());
+                cpuChartManager.addEntry((int) used3.getCpuPer());
+                netChartManager.addEntry(used3.getCurrNet());
                 break;
         }
     }
@@ -130,7 +134,7 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
     public boolean onQueryTextSubmit(String query) {
         try {
             Log.d("onQueryTextSubmit:", "onQueryTextSubmit:" + query);
-            appsPresenter.getData(3, query);
+            appsPresenter.getData(1, query);
         } catch (Exception e) {
             e.printStackTrace();
         }

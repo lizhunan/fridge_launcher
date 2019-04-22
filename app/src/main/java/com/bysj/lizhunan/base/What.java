@@ -20,6 +20,11 @@ public class What {
      */
     public static final int LINE_CHART_CHANGE = 0x03;
 
+    /**
+     * 更新指定进程折线图
+     */
+    public static final int LINE_CHART_PROCESS_CHANGE = 0x04;
+
     /** 标记异步操作返回时目标界面已经消失时的处理状态 */
     public static final int ACTIVITY_GONE = -1;
 }
