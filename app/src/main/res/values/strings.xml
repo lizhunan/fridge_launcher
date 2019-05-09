@@ -54,4 +54,7 @@
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
     <string name="not_found_app">没有找到该应用</string>
+    <string name="pre_key_policy_settings">pre_key_policy_settings</string>
+    <string name="pref_summary_policy_settings">监控数据上传策略</string>
+    <string name="pref_title_policy_settings">监控策略</string>
 </resources>

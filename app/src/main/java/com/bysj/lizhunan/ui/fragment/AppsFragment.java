@@ -71,7 +71,7 @@ public class AppsFragment extends BaseFragment implements IGetData<List<App>>, A
     protected void doBusiness(Context mContext, Activity activity) {
         appsPresenter = new AppsPresenter(this, handler);
         appsList.setAdapter(appListAdapter);
-        appsPresenter.getData(1, null);
+        appsPresenter.getData(4, null);
     }
 
     @Override

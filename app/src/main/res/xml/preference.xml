@@ -26,6 +26,10 @@
             android:key="@string/pref_key_open_service_settings"
             android:summary="@string/pref_summary_open_service_settings"
             android:title="@string/pref_title_open_service_settings" />
+        <ListPreference
+            android:key="@string/pre_key_policy_settings"
+            android:summary="@string/pref_summary_policy_settings"
+            android:title="@string/pref_title_policy_settings" />
     </PreferenceCategory>
 
     <PreferenceCategory

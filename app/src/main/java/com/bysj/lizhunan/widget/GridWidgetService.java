@@ -30,10 +30,10 @@ import java.util.List;
 public class GridWidgetService extends RemoteViewsService {
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        return new GridWidgetViewFactory(this,intent);
+        return new GridWidgetViewFactory(this, intent);
     }
 
-    public static class GridWidgetViewFactory implements RemoteViewsFactory , IGetData<List<App>> {
+    public static class GridWidgetViewFactory implements RemoteViewsFactory, IGetData<List<App>> {
 
         private Context context;
         private int mAppWidgetId;
@@ -49,11 +49,12 @@ public class GridWidgetService extends RemoteViewsService {
         @Override
         public void onCreate() {
             pm = LauncherApplication.getContext().getPackageManager();
-            List<PackageInfo> allApp = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES);//查询所有app
-
+            List<PackageInfo> hiddenApp = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES);
             apps.clear();
-            for (int j = 0; j < allApp.size(); j++) {
-                apps.add(getAppInfo(allApp.get(j)));
+            for (int j = 0; j < hiddenApp.size(); j++) {
+                if (LauncherApplication.mDPM.isApplicationHidden(LauncherApplication.mComponentName, hiddenApp.get(j).packageName)) {
+                    apps.add(getAppInfo(hiddenApp.get(j)));
+                }
             }
         }
 
@@ -134,6 +135,7 @@ public class GridWidgetService extends RemoteViewsService {
         public void refreshUI() {
 
         }
+
         private App getAppInfo(PackageInfo packageInfo) {
             App appInfo = new App();
             appInfo.setAppName((String) packageInfo.applicationInfo.loadLabel(pm));
