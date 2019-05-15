@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.bysj.lizhunan.R;
 import com.bysj.lizhunan.base.BaseFragment;
@@ -71,7 +72,12 @@ public class AppsFragment extends BaseFragment implements IGetData<List<App>>, A
     protected void doBusiness(Context mContext, Activity activity) {
         appsPresenter = new AppsPresenter(this, handler);
         appsList.setAdapter(appListAdapter);
-        appsPresenter.getData(4, null);
+        try {
+            appsPresenter.getData(5, null);
+        } catch (Exception e) {
+            Toast.makeText(getContext(),getContext().getString(R.string.no_permission),Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
     }
 
     @Override
