@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
 
 import com.bysj.lizhunan.base.LauncherApplication;
 import com.bysj.lizhunan.bean.App;
@@ -48,7 +49,7 @@ public class AppModel {
         return appInfo;
     }
 
-    public void data(final int i, final OnGetAppInfo onGetAppInfo, final String appName) {
+    public void data(final int i, final OnGetAppInfo onGetAppInfo, final String appName)throws Exception {
         final List<App> appInfos = new ArrayList<App>(); // 保存过滤查到的AppInfo
         new Thread(new Runnable() {
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -75,7 +76,7 @@ public class AppModel {
                         for (PackageInfo pkg : packageInfos) {
                             //非系统程序
                             if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) <= 0) {
-                                if (pkg.packageName.equals("com.bysj.lizhunan")) {
+                                if (pkg.equals("com.bysj.lizhunan")) {
                                     continue;
                                 }
                                 appInfos.add(getAppInfo(pkg));
@@ -113,18 +114,43 @@ public class AppModel {
                                         appInfos.add(getAppInfo(pkg));
                                         break;
                                     }
-                                } else {
-
                                 }
                             }
                             onGetAppInfo.onLoaded();
                             onGetAppInfo.onSuccess(appInfos);
                         }
+                        break;
                     case 4:
                         List<PackageInfo> allApp = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES);//查询所有app
                         appInfos.clear();
                         for (int j = 0; j < allApp.size(); j++) {
                             appInfos.add(getAppInfos(allApp.get(j)));
+                        }
+                        onGetAppInfo.onLoaded();
+                        onGetAppInfo.onSuccess(appInfos);
+                        break;
+                    case 5:
+                        //隐藏应用和普通应用
+                        appInfos.clear();
+                        List<PackageInfo> hiddenApp1 = pm.getInstalledPackages(PackageManager.GET_UNINSTALLED_PACKAGES);
+                        appInfos.clear();
+                        for (int j = 0; j < hiddenApp1.size(); j++) {
+                            if (LauncherApplication.mDPM.isApplicationHidden(LauncherApplication.mComponentName, hiddenApp1.get(j).packageName)) {
+                                appInfos.add(getAppInfos(hiddenApp1.get(j)));
+                            }
+                        }
+                        for (PackageInfo pkg : packageInfos) {
+                            //非系统程序
+                            if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) <= 0) {
+                                if (pkg.packageName.equals("com.bysj.lizhunan")) {
+                                    continue;
+                                }
+                                appInfos.add(getAppInfos(pkg));
+                            } else if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {//本来是系统程序，被用户手动更新后，该系统程序也成为第三方应用程序了
+                                appInfos.add(getAppInfos(pkg));
+                            } else {
+
+                            }
                         }
                         onGetAppInfo.onLoaded();
                         onGetAppInfo.onSuccess(appInfos);

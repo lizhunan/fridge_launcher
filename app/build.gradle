@@ -33,6 +33,6 @@ dependencies {
     api 'com.squareup.retrofit2:retrofit:2.5.0'
     api 'com.squareup.retrofit2:converter-gson:2.4.0'
     api 'io.reactivex:rxjava:1.0.14'
-    api 'com.jaredrummler:android-processes:1.0.3'
+    api 'com.jaredrummler:android-processes:1.0.8'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }

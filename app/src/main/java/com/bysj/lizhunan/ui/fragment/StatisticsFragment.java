@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import com.bysj.lizhunan.R;
 import com.bysj.lizhunan.base.BaseFragment;
@@ -134,7 +135,7 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
     public boolean onQueryTextSubmit(String query) {
         try {
             Log.d("onQueryTextSubmit:", "onQueryTextSubmit:" + query);
-            appsPresenter.getData(1, query);
+            appsPresenter.getData(3, query);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -154,10 +155,18 @@ public class StatisticsFragment extends BaseFragment implements SearchView.OnQue
 
     @Override
     public void showSuccess(List<App> appInfo) {
-        Intent intent = new Intent(getActivity(), CoreService.class);
-        intent.putExtra(Constants.START_CHANGE_CORE_SERVICE, appInfo.get(0).getPackageName());
-        intent.setAction(Constants.START_CHANGE_CORE_SERVICE);
-        getActivity().startService(intent);
+        for (int i = 0; i < appInfo.size(); i++) {
+            Log.d("ss:","s:"+appInfo.get(i).getPackageName());
+        }
+        try {
+            Intent intent = new Intent(getActivity(), CoreService.class);
+            intent.putExtra(Constants.START_CHANGE_CORE_SERVICE, appInfo.get(0).getPackageName());
+            intent.setAction(Constants.START_CHANGE_CORE_SERVICE);
+            getActivity().startService(intent);
+        }catch (Exception e){
+            Toast.makeText(getContext(),getContext().getString(R.string.no_apps),Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
     }
 
     @Override

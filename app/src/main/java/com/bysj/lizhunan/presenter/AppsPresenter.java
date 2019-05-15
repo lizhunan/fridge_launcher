@@ -1,5 +1,7 @@
 package com.bysj.lizhunan.presenter;
 
+import android.util.Log;
+
 import com.bysj.lizhunan.base.BaseHandler;
 import com.bysj.lizhunan.bean.App;
 import com.bysj.lizhunan.model.AppModel;
@@ -31,7 +33,7 @@ public class AppsPresenter {
      *
      * @param i 数据类型
      */
-    public void getData(int i,String appName) {
+    public void getData(final int i, String appName) throws Exception {
         appModel.data(i, new OnGetAppInfo() {
             @Override
             public void onSuccess(final List<App> appInfos) {

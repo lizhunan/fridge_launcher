@@ -43,7 +43,6 @@ public class LooperTask extends TimerTask {
 
     @Override
     public void run() {
-        Log.d("LooperTask:", "run");
         Message message = handler.obtainMessage();
         Used used = new Used();
         switch (what) {
@@ -57,7 +56,7 @@ public class LooperTask extends TimerTask {
                 handler.sendMessage(message);
                 break;
             case What.PROCESS_USED_DATA_CHANGE:
-                Log.d("LooperTask:", "LINE_CHART_CHANGE_MEMORY");
+                Log.d("LooperTask:", "LINE_CHART_CHANGE_MEMORY"+pkgName);
                 used.setMemoryPer( MemoryMonitor.getMemoryPercent());
                 used.setCurrMemory(MemoryMonitor.getAppMemoryPercent(pkgName));
                 used.setMemoryUsed((int) MemoryMonitor.getAppPss(pkgName));

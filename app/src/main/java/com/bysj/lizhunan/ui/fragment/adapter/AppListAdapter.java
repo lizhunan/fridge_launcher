@@ -1,6 +1,8 @@
 package com.bysj.lizhunan.ui.fragment.adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
@@ -18,10 +20,12 @@ public class AppListAdapter extends BaseListAdapter<App> {
 
     private OnCheckedCtrlListener onCheckedCtrlListener;
     private Context context;
+    private SharedPreferences sp;
 
     public AppListAdapter(Context mContext) {
         super(mContext);
         this.context = mContext;
+        sp = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public void setOnCheckedCtrlListener(OnCheckedCtrlListener onCheckedCtrlListener) {
@@ -56,6 +60,7 @@ public class AppListAdapter extends BaseListAdapter<App> {
         }else {
             ctrlSt.setText(context.getResources().getString(R.string.no_ctrl));
         }
+        ctrlSt.setEnabled(sp.getBoolean(context.getString(R.string.pref_key_is_ctrl_settings),true));
         appIcon.setImageDrawable(app.getImage());
         ctrlSt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override

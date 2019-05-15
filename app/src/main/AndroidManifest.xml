@@ -24,6 +24,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppThemeTealDark"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".ui.activity.WebActivity"></activity>
+
         <receiver android:name=".widget.ShowCtrlAppsWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

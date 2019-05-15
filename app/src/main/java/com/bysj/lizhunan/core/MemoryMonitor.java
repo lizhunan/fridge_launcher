@@ -22,6 +22,7 @@ import java.util.List;
 public class MemoryMonitor {
 
     private static MemoryMonitor INSTANCE;
+   // private ActivityManager _ActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 
     public static MemoryMonitor getINSTANCE() {
         if (INSTANCE == null) {

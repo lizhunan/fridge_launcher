@@ -1,14 +1,17 @@
 package com.bysj.lizhunan.core;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.support.constraint.ConstraintLayout;
 import android.util.Log;
 import android.view.Gravity;
@@ -46,6 +49,7 @@ public class CoreService extends Service implements View.OnTouchListener {
     private LooperTask task;
     private ScheduledExecutorService pool;
     private CoreHandler handler = new CoreHandler();
+    private SharedPreferences sp;
 
     public CoreService() {
     }
@@ -54,14 +58,21 @@ public class CoreService extends Service implements View.OnTouchListener {
     public void onCreate() {
         super.onCreate();
         floatView = getIconView();
+        sp = PreferenceManager.getDefaultSharedPreferences(this);
         descView = floatView.findViewById(R.id.content);
-        createFloatView();
+        if (sp.getBoolean(getString(R.string.pref_key_is_float_settings), true)) {
+            createFloatView();
+        }
     }
 
+    @SuppressLint("WrongConstant")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        switch (Objects.requireNonNull(intent.getAction())) {
+        String state = Constants.START_CORE_SERVICE;
+        if (intent != null) {
+            state = intent.getAction();
+        }
+        switch (state) {
             case Constants.START_CORE_SERVICE:
                 if (pool == null) {
                     pool = Executors.newScheduledThreadPool(1);
@@ -74,6 +85,7 @@ public class CoreService extends Service implements View.OnTouchListener {
                 if (pool == null) {
                     pool = Executors.newScheduledThreadPool(1);
                 }
+                Log.d("sss","::"+intent.getStringExtra(Constants.START_CHANGE_CORE_SERVICE));
                 task.setSomething(intent.getStringExtra(Constants.START_CHANGE_CORE_SERVICE));
                 task.setWhat(What.PROCESS_USED_DATA_CHANGE);
                 pool.scheduleAtFixedRate(task, 0, 3 * 1000, TimeUnit.MILLISECONDS);
@@ -87,7 +99,7 @@ public class CoreService extends Service implements View.OnTouchListener {
 
         }
 
-        return super.onStartCommand(intent, flags, startId);
+        return super.onStartCommand(intent, Service.START_REDELIVER_INTENT, startId);
     }
 
     private View getIconView() {
@@ -179,41 +191,45 @@ public class CoreService extends Service implements View.OnTouchListener {
 
         @Override
         public void handleMessage(Message msg, int what) {
-            Message message = StatisticsFragment.mHandler.obtainMessage();
-            switch (msg.what) {
-                case What.USED_DATA_CHANGE:
-                    Log.d("handleMessage:", "LINE_CHART_CHANGE:" + msg.obj);
-                    Used used1 = (Used) msg.obj;
-                    if (used1.getCpuPer() > 0 && used1.getCpuPer() < 1) {
-                        used1.setCpuPer(1.0);
-                    }
-                    if (used1.getCurrNet() >= 1048576d) {
-                        used1.setCurrNet((int) (used1.getCurrNet() / 1048576d));
-                    } else {
-                        used1.setCurrNet((int) (used1.getCurrNet() / 1024d));
-                    }
-                    descView.setText("总内存：" + MemoryMonitor.getTotalSize() + "\n" +
-                            "可使用内存：" + MemoryMonitor.getAvailableMemory() / 1024 + "\n" +
-                            "已使用内存：" + used1.getMemoryUsed() + "\n" +
-                            "当前内存使用百分比：" + used1.getMemoryPer() + "%\n" + "" +
-                            "当前CPU使用百分比" + used1.getCpuPer() + "%\n" +
-                            "当前网速" + used1.getCurrNet());
-                    message.what = What.LINE_CHART_CHANGE;
-                    message.obj = used1;
-                    StatisticsFragment.mHandler.sendMessage(message);
-                    break;
-                case What.PROCESS_USED_DATA_CHANGE:
-                    Log.d("handleMessage:", "LINE_CHART_PROCESS_CHANGE:" + msg.obj);
-                    Used used2 = (Used) msg.obj;
-                    descView.setText("总内存：" + MemoryMonitor.getTotalSize() + "\n" +
-                            "可使用内存：" + MemoryMonitor.getAvailableMemory() / 1024 + "\n" +
-                            "当前进程已使用内存：" + used2.getMemoryUsed() + "\n" +
-                            "当前内存使用百分比：" + used2.getMemoryPer() + "%\n" +
-                            "当前进程内存使用情况：" + used2.getCurrMemory() + "%\n");
-                    message.what = What.LINE_CHART_PROCESS_CHANGE;
-                    message.obj = used2;
-                    StatisticsFragment.mHandler.sendMessage(message);
-                    break;
+            try {
+                Message message = StatisticsFragment.mHandler.obtainMessage();
+                switch (msg.what) {
+                    case What.USED_DATA_CHANGE:
+                        Log.d("handleMessage:", "LINE_CHART_CHANGE:" + msg.obj);
+                        Used used1 = (Used) msg.obj;
+                        if (used1.getCpuPer() > 0 && used1.getCpuPer() < 1) {
+                            used1.setCpuPer(1.0);
+                        }
+                        if (used1.getCurrNet() >= 1048576d) {
+                            used1.setCurrNet((int) (used1.getCurrNet() / 1048576d));
+                        } else {
+                            used1.setCurrNet((int) (used1.getCurrNet() / 1024d));
+                        }
+                        descView.setText("总内存：" + MemoryMonitor.getTotalSize() + "\n" +
+                                "可使用内存：" + MemoryMonitor.getAvailableMemory() / 1024 + "\n" +
+                                "已使用内存：" + used1.getMemoryUsed() + "\n" +
+                                "当前内存使用百分比：" + used1.getMemoryPer() + "%\n" + "" +
+                                "当前CPU使用百分比" + used1.getCpuPer() + "%\n" +
+                                "当前网速" + used1.getCurrNet());
+                        message.what = What.LINE_CHART_CHANGE;
+                        message.obj = used1;
+                        StatisticsFragment.mHandler.sendMessage(message);
+                        break;
+                    case What.PROCESS_USED_DATA_CHANGE:
+                        Log.d("handleMessage:", "LINE_CHART_PROCESS_CHANGE:" + msg.obj);
+                        Used used2 = (Used) msg.obj;
+                        descView.setText("总内存：" + MemoryMonitor.getTotalSize() + "\n" +
+                                "可使用内存：" + MemoryMonitor.getAvailableMemory() / 1024 + "\n" +
+                                "当前进程已使用内存：" + used2.getMemoryUsed() + "\n" +
+                                "当前内存使用百分比：" + used2.getMemoryPer() + "%\n" +
+                                "当前进程内存使用情况：" + used2.getCurrMemory() + "%\n");
+                        message.what = What.LINE_CHART_PROCESS_CHANGE;
+                        message.obj = used2;
+                        StatisticsFragment.mHandler.sendMessage(message);
+                        break;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
