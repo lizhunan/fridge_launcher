@@ -26,12 +26,22 @@ import com.bysj.lizhunan.base.BaseHandler;
 import com.bysj.lizhunan.base.Constants;
 import com.bysj.lizhunan.base.What;
 import com.bysj.lizhunan.bean.Used;
+import com.bysj.lizhunan.http.RetrofitUtils;
 import com.bysj.lizhunan.ui.fragment.StatisticsFragment;
 
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * 系统资源监测服务
@@ -49,7 +59,8 @@ public class CoreService extends Service implements View.OnTouchListener {
     private LooperTask task;
     private ScheduledExecutorService pool;
     private CoreHandler handler = new CoreHandler();
-    private SharedPreferences sp;
+    private static SharedPreferences sp;
+    private static String pkgName;
 
     public CoreService() {
     }
@@ -78,6 +89,8 @@ public class CoreService extends Service implements View.OnTouchListener {
                     pool = Executors.newScheduledThreadPool(1);
                 }
                 task = LooperTask.getINSTANCE(handler);
+                pkgName = "所有应用";
+                task.setSomething(pkgName);
                 task.setWhat(What.USED_DATA_CHANGE);
                 pool.scheduleAtFixedRate(task, 0, 3 * 1000, TimeUnit.MILLISECONDS);
                 break;
@@ -85,8 +98,8 @@ public class CoreService extends Service implements View.OnTouchListener {
                 if (pool == null) {
                     pool = Executors.newScheduledThreadPool(1);
                 }
-                Log.d("sss","::"+intent.getStringExtra(Constants.START_CHANGE_CORE_SERVICE));
-                task.setSomething(intent.getStringExtra(Constants.START_CHANGE_CORE_SERVICE));
+                pkgName = intent.getStringExtra(Constants.START_CHANGE_CORE_SERVICE);
+                task.setSomething(pkgName);
                 task.setWhat(What.PROCESS_USED_DATA_CHANGE);
                 pool.scheduleAtFixedRate(task, 0, 3 * 1000, TimeUnit.MILLISECONDS);
                 break;
@@ -188,49 +201,80 @@ public class CoreService extends Service implements View.OnTouchListener {
 
 
     public static class CoreHandler extends BaseHandler {
-
+        JSONObject jsonObject = new JSONObject();
+        @SuppressLint("SetTextI18n")
         @Override
         public void handleMessage(Message msg, int what) {
+            Used used = (Used) msg.obj;
             try {
                 Message message = StatisticsFragment.mHandler.obtainMessage();
                 switch (msg.what) {
                     case What.USED_DATA_CHANGE:
                         Log.d("handleMessage:", "LINE_CHART_CHANGE:" + msg.obj);
-                        Used used1 = (Used) msg.obj;
-                        if (used1.getCpuPer() > 0 && used1.getCpuPer() < 1) {
-                            used1.setCpuPer(1.0);
+                        if (used.getCpuPer() > 0 && used.getCpuPer() < 1) {
+                            used.setCpuPer(1.0);
                         }
-                        if (used1.getCurrNet() >= 1048576d) {
-                            used1.setCurrNet((int) (used1.getCurrNet() / 1048576d));
+                        if (used.getCurrNet() >= 1048576d) {
+                            used.setCurrNet((int) (used.getCurrNet() / 1048576d));
                         } else {
-                            used1.setCurrNet((int) (used1.getCurrNet() / 1024d));
+                            used.setCurrNet((int) (used.getCurrNet() / 1024d));
                         }
                         descView.setText("总内存：" + MemoryMonitor.getTotalSize() + "\n" +
                                 "可使用内存：" + MemoryMonitor.getAvailableMemory() / 1024 + "\n" +
-                                "已使用内存：" + used1.getMemoryUsed() + "\n" +
-                                "当前内存使用百分比：" + used1.getMemoryPer() + "%\n" + "" +
-                                "当前CPU使用百分比" + used1.getCpuPer() + "%\n" +
-                                "当前网速" + used1.getCurrNet());
+                                "已使用内存：" + used.getMemoryUsed() + "\n" +
+                                "当前内存使用百分比：" + used.getMemoryPer() + "%\n" + "" +
+                                "当前CPU使用百分比" + used.getCpuPer() + "%\n" +
+                                "当前网速" + used.getCurrNet());
+                        jsonObject.put("memory",used.getMemoryPer());
+                        jsonObject.put("cpu",used.getCpuPer());
                         message.what = What.LINE_CHART_CHANGE;
-                        message.obj = used1;
+                        message.obj = used;
                         StatisticsFragment.mHandler.sendMessage(message);
                         break;
                     case What.PROCESS_USED_DATA_CHANGE:
                         Log.d("handleMessage:", "LINE_CHART_PROCESS_CHANGE:" + msg.obj);
-                        Used used2 = (Used) msg.obj;
+
                         descView.setText("总内存：" + MemoryMonitor.getTotalSize() + "\n" +
                                 "可使用内存：" + MemoryMonitor.getAvailableMemory() / 1024 + "\n" +
-                                "当前进程已使用内存：" + used2.getMemoryUsed() + "\n" +
-                                "当前内存使用百分比：" + used2.getMemoryPer() + "%\n" +
-                                "当前进程内存使用情况：" + used2.getCurrMemory() + "%\n");
+                                "当前进程已使用内存：" + used.getMemoryUsed() + "\n" +
+                                "当前内存使用百分比：" + used.getMemoryPer() + "%\n" +
+                                "当前进程内存使用情况：" + used.getCurrMemory() + "%\n");
+                        jsonObject.put("memory",used.getCurrMemory());
+                        jsonObject.put("cpu",used.getCpuPer());
                         message.what = What.LINE_CHART_PROCESS_CHANGE;
-                        message.obj = used2;
+                        message.obj = used;
                         StatisticsFragment.mHandler.sendMessage(message);
                         break;
+                }
+                if (sp.getBoolean("pref_key_catch_settings", false)) {
+
+                    Call call = RetrofitUtils.getClient().newCall(RetrofitUtils.request(pkgName,jsonObject.toString()));
+                    call.enqueue(new okhttp3.Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+
+                        }
+                    });
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public static class UploadThread extends Thread {
+        @Override
+        public void run() {
+            Log.d("run", "run");
+            //Map<String,String> map = new HashMap<>();
+            //map.put("appName","");
+            //map.put("info","");
+            //RetrofitUtils.getInstance().getApiService().getBulletin(map);
         }
     }
 }
